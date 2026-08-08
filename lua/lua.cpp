@@ -1,4 +1,4 @@
-#include "..\main.h"
+#include <ljd_main_compat.h>
 
 Lua::Lua(const Bytecode& bytecode, const Ast& ast, const std::string& filePath, const bool& forceOverwrite, const bool& minimizeDiffs, const bool& unrestrictedAscii)
 	: bytecode(bytecode), ast(ast), filePath(filePath), forceOverwrite(forceOverwrite), minimizeDiffs(minimizeDiffs), unrestrictedAscii(unrestrictedAscii) {}
@@ -567,7 +567,7 @@ void Lua::write_expression(const Ast::Expression& expression, const bool& usePar
 			switch (expression.binaryOperation->leftOperand->constant->type) {
 			case Ast::AST_CONSTANT_NUMBER:
 			case Ast::AST_CONSTANT_CDATA_IMAGINARY:
-				if (std::bit_cast<uint64_t>(expression.binaryOperation->leftOperand->constant->number) & DOUBLE_SIGN) parentheses = true;
+				if (ljd::bit_cast<uint64_t>(expression.binaryOperation->leftOperand->constant->number) & DOUBLE_SIGN) parentheses = true;
 				break;
 			case Ast::AST_CONSTANT_CDATA_SIGNED:
 				if (expression.binaryOperation->leftOperand->constant->signed_integer < 0) parentheses = true;
@@ -821,7 +821,7 @@ void Lua::write_number(const double& number) {
 		}
 	};
 
-	const uint64_t rawDouble = std::bit_cast<uint64_t>(number);
+	const uint64_t rawDouble = ljd::bit_cast<uint64_t>(number);
 
 	if ((rawDouble & DOUBLE_EXPONENT) == DOUBLE_SPECIAL) {
 		write(rawDouble & DOUBLE_SIGN ? "-1e309" : "1e309");
@@ -1004,22 +1004,20 @@ void Lua::write_indent() {
 void Lua::create_file() {
 #ifndef _DEBUG
 	if (!forceOverwrite) {
-		file = CreateFileA(filePath.c_str(), GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-
-		if (file != INVALID_HANDLE_VALUE) {
-			close_file();
-			assert(MessageBoxA(NULL, ("The file " + filePath + " already exists.\n\nDo you want to overwrite it?").c_str(), PROGRAM_NAME, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES,
-				"File already exists", filePath, DEBUG_INFO);
+		FILE* f = fopen(filePath.c_str(), "rb");
+		if (f) {
+			fclose(f);
+			(void)0; /* always overwrite in library mode */
 		}
 	}
 #endif
-	file = CreateFileA(filePath.c_str(), GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+	file = (HANDLE)fopen(filePath.c_str(), "wb");
 	assert(file != INVALID_HANDLE_VALUE, "Unable to create file", filePath, DEBUG_INFO);
 }
 
 void Lua::close_file() {
 	if (file == INVALID_HANDLE_VALUE) return;
-	CloseHandle(file);
+	ljd_close_file((FILE*)file);
 	file = INVALID_HANDLE_VALUE;
 }
 

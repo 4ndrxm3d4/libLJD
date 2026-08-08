@@ -1,4 +1,4 @@
-#include "..\main.h"
+#include "ljd_main_compat.h"
 
 Bytecode::Prototype::Prototype(const Bytecode& bytecode) : bytecode(bytecode) {}
 

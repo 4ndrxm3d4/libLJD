@@ -1,0 +1,27 @@
+# Gradle Module: native-lib
+# Used to package prebuilt .so files into an AAR for Android apps.
+# Place your .so files under src/main/jniLibs/<abi>/
+
+android {
+    compileSdk 35
+    namespace 'com.marsinator.ljd'
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'consumer-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    // No Java/Kotlin dependencies required; this module is a JNI wrapper.
+}

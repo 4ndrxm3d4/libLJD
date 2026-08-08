@@ -2699,7 +2699,7 @@ void Ast::build_if_statements_from_map(Function& function, std::vector<Statement
 	for (uint32_t i = 0; i < block.size(); i++) {
 		switch (block[i]->type) {
 		case AST_STATEMENT_GOTO:
-			if (!offsetMap.contains(block[i])) continue;
+			if (!offsetMap.find(block[i]) != offsetMap.end()) continue;
 		case AST_STATEMENT_CONDITION:
 			function.remove_jump(block[i]->instruction.id, block[i]->instruction.target);
 			index = offsetMap[block[i]] + i;
@@ -2857,7 +2857,7 @@ void Ast::build_if_statements(Function& function, std::vector<Statement*>& block
 					continue;
 				}
 
-				if (indexes.size() >= 2 && offsetMap.contains(block[indexes[indexes.size() - 2]])) {
+				if (indexes.size() >= 2 && offsetMap.find(block[indexes[indexes.size() - 2]]) != offsetMap.end()) {
 					indexes.pop_back();
 					function.add_jump(block[indexes.back()]->instruction.id, block[indexes.back()]->instruction.target);
 				}
@@ -2874,7 +2874,7 @@ void Ast::build_if_statements(Function& function, std::vector<Statement*>& block
 		case AST_STATEMENT_GOTO:
 			if (block[i]->instruction.type == Bytecode::BC_OP_LOOP) continue;
 		case AST_STATEMENT_CONDITION:
-			if (offsetMap.contains(block[i])) continue;
+			if (offsetMap.find(block[i]) != offsetMap.end()) continue;
 			indexes.emplace_back(i);
 			i--;
 		}
@@ -2889,7 +2889,7 @@ void Ast::build_if_statements(Function& function, std::vector<Statement*>& block
 	if (!indexes.size()) return build_if_statements_from_map(function, block, previousBlock, offsetMap);
 
 	for (uint32_t i = indexes.size(); i--;) {
-		if (offsetMap.contains(block[indexes[i]])) function.add_jump(block[indexes[i]]->instruction.id, block[indexes[i]]->instruction.target);
+		if (offsetMap.find(block[indexes[i]]) != offsetMap.end()) function.add_jump(block[indexes[i]]->instruction.id, block[indexes[i]]->instruction.target);
 	}
 
 	for (uint32_t i = block.size(); i--;) {
