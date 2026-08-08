@@ -1022,8 +1022,7 @@ void Lua::close_file() {
 }
 
 void Lua::write_file() {
-	DWORD charsWritten = 0;
-	assert(WriteFile(file, writeBuffer.data(), writeBuffer.size(), &charsWritten, NULL) && !(writeBuffer.size() - charsWritten), "Failed writing to file", filePath, DEBUG_INFO);
+	size_t wr = fwrite(writeBuffer.data(), 1, writeBuffer.size(), (FILE*)file); assert(wr == writeBuffer.size(), "Failed writing to file", filePath, DEBUG_INFO);
 	writeBuffer.clear();
 	writeBuffer.shrink_to_fit();
 }
