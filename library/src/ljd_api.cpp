@@ -87,6 +87,7 @@ static string make_temp_path(const string& cacheDir, const string& tag) {
 }
 
 /* ------------------------------------------------------------------ */
+
 struct Decompiler {
     uint32_t options;
     string cacheDir;
