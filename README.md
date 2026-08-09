@@ -186,10 +186,10 @@ gcc -o example example.c -I./library/include -L./build -lljd -Wl,-rpath,./build
 
 ### Java (JNI)
 
-The library exposes JNI functions in the package `com.marsinator.ljd.Ljd`.
+The library exposes JNI functions in the package `com.neodroid.ide.ljd.Ljd`.
 
 ```java
-package com.marsinator.ljd;
+package com.neodroid.ide.ljd;
 
 public class Ljd {
     static { System.loadLibrary("ljd"); }
@@ -220,7 +220,7 @@ On Android, add the prebuilt `libljd.so` to `src/main/jniLibs/arm64-v8a/`.
 ### Kotlin
 
 ```kotlin
-import com.marsinator.ljd.Ljd
+import com.neodroid.ide.ljd.Ljd
 
 object LjdOptions {
     const val NONE = 0
