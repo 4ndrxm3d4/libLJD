@@ -70,6 +70,26 @@ if (rc == LJD_OK) {
 ljd_close(ctx);
 ```
 
+### File-based decompilation
+
+The same library also exposes a file-to-file API:
+
+```c
+ljd_ctx* ctx = ljd_init(LJD_OPT_NONE);
+char* out = NULL;
+size_t out_sz = 0;
+int rc = ljd_decompile_file(ctx, "input.luac", "output.lua", false, &out, &out_sz);
+
+if (rc == LJD_OK) {
+    printf("Decompiled %zu bytes\n", out_sz);
+    ljd_free_string(out);
+} else {
+    fprintf(stderr, "error: %s\n", ljd_strerror(rc));
+}
+
+ljd_close(ctx);
+```
+
 ### Error codes
 
 | Code | Meaning |
@@ -178,6 +198,10 @@ object LjdOptions {
 
 fun decompile(bytecode: ByteArray, cacheDir: File): String? {
     return Ljd.decompile(bytecode, LjdOptions.NONE, cacheDir.absolutePath)
+}
+
+fun decompileFile(inputPath: String, outputPath: String, overwrite: Boolean = false): String? {
+    return Ljd.decompileFile(inputPath, outputPath, overwrite)
 }
 ```
 
