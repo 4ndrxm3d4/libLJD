@@ -48,8 +48,6 @@ Java_com_marsinator_ljd_Ljd_decompile(
     std::vector<uint8_t> buf((size_t)len);
     env->GetByteArrayRegion(bytecode, 0, len, reinterpret_cast<jbyte*>(buf.data()));
 
-    /* Propagate the app's files dir into the decompiler so that all
-     * temporary files land there instead of /tmp. */
     if (cacheDir) {
         const char* c = env->GetStringUTFChars(cacheDir, nullptr);
         if (c && *c) setenv("LJD_CACHE_DIR", c, 1);
@@ -84,6 +82,7 @@ Java_com_marsinator_ljd_Ljd_decompile(
     jstring result = env->NewStringUTF(out);
     ljd_free_string(out);
     return result;
+}
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_marsinator_ljd_Ljd_decompileFile(
@@ -143,4 +142,3 @@ Java_com_marsinator_ljd_Ljd_decompileFile(
     ljd_free_string(out);
     return result;
 }
-
