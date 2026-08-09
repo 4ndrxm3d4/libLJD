@@ -1,5 +1,4 @@
 #include "ljd/ljd.h"
-#include <cstdio>
 
 #include <cstdio>
 #include <cstdlib>
@@ -8,8 +7,11 @@
 #include <string>
 #include <vector>
 
-#include <cstring>
-#include <type_traits>
+#include "ljd_compat.h"
+
+
+
+using namespace std;
 
 class Bytecode;
 class Ast;
@@ -18,12 +20,6 @@ class Lua;
 #include "bytecode/bytecode.h"
 #include "ast/ast.h"
 #include "lua/lua.h"
-
-#include "ljd_compat.h"
-
-using namespace std;
-
-namespace ljd {
 
 /* ------------------------------------------------------------------ */
 /* Library-local no-op implementations for the UI helpers that the    */
@@ -58,14 +54,11 @@ std::string byte_to_string(const uint8_t& byte) {
     return string(buf);
 }
 
-
 /* ------------------------------------------------------------------ */
 /* Portable cache-directory helpers                                    */
 /* ------------------------------------------------------------------ */
 static string default_cache_dir() {
 #if defined(__ANDROID__) && defined(LJD_ANDROID)
-    /* When built for Android the app passes the cache directory through
-     * an environment variable so that the library never touches /tmp. */
     const char* env = getenv("LJD_CACHE_DIR");
     if (env && *env) return string(env);
 #endif
@@ -86,7 +79,7 @@ static string make_temp_path(const string& cacheDir, const string& tag) {
     return string(buf);
 }
 
-/* ------------------------------------------------------------------ */
+namespace ljd {
 
 struct Decompiler {
     uint32_t options;
@@ -120,7 +113,7 @@ struct Decompiler {
                 fclose(f);
             }
 
-            Bytecode bc{std::string(inPath)};
+            Bytecode bc{string(inPath)};
             bc();
 
             Ast ast(bc, (options & LJD_OPT_IGNORE_DEBUG_INFO) != 0,
@@ -131,7 +124,7 @@ struct Decompiler {
             snprintf(outPath, sizeof(outPath),
                      "%s/ljd_out_%p.lua", cacheDir.c_str(), (void*)out);
 
-            Lua lua(bc, ast, std::string(outPath), true,
+            Lua lua(bc, ast, string(outPath), true,
                     (options & LJD_OPT_MINIMIZE_DIFFS) != 0,
                     (options & LJD_OPT_UNRESTRICTED_ASCII) != 0);
             lua();
@@ -178,11 +171,7 @@ struct Decompiler {
 } // namespace ljd
 
 extern "C" ljd_ctx* ljd_init(uint32_t options) {
-    try {
-        return reinterpret_cast<ljd_ctx*>(new (nothrow) ljd::Decompiler(options));
-    } catch (...) {
-        return nullptr;
-    }
+    return reinterpret_cast<ljd_ctx*>(new (nothrow) ljd::Decompiler(options));
 }
 
 extern "C" int ljd_decompile(ljd_ctx* ctx,
