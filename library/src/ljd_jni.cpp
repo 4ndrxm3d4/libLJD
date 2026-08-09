@@ -144,4 +144,3 @@ Java_com_marsinator_ljd_Ljd_decompileFile(
     return result;
 }
 
-}
