@@ -6,26 +6,26 @@
 #include "ljd/ljd.h"
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_marsinator_ljd_Ljd_strerror(JNIEnv* env, jclass /*cls*/, jint code) {
+Java_com_neodroid_ide_ljd_Ljd_strerror(JNIEnv* env, jclass /*cls*/, jint code) {
     const char* msg = ljd_strerror((int)code);
     if (!msg) msg = "Unknown error";
     return env->NewStringUTF(msg);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_marsinator_ljd_Ljd_version(JNIEnv* env, jclass /*cls*/) {
+Java_com_neodroid_ide_ljd_Ljd_version(JNIEnv* env, jclass /*cls*/) {
     return env->NewStringUTF(ljd_version());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_marsinator_ljd_Ljd_cacheDir(JNIEnv* env, jclass /*cls*/) {
+Java_com_neodroid_ide_ljd_Ljd_cacheDir(JNIEnv* env, jclass /*cls*/) {
     const char* d = ljd_cache_dir(nullptr);
     if (!d || !*d) return env->NewStringUTF("");
     return env->NewStringUTF(d);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_marsinator_ljd_Ljd_decompile(
+Java_com_neodroid_ide_ljd_Ljd_decompile(
         JNIEnv* env,
         jclass /*cls*/,
         jbyteArray bytecode,
@@ -33,14 +33,14 @@ Java_com_marsinator_ljd_Ljd_decompile(
         jstring cacheDir) {
 
     if (!bytecode) {
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, ljd_strerror(LJD_ERR_NULL_PTR));
         return nullptr;
     }
 
     jsize len = env->GetArrayLength(bytecode);
     if (len <= 0) {
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, ljd_strerror(LJD_ERR_EMPTY_IN));
         return nullptr;
     }
@@ -56,7 +56,7 @@ Java_com_marsinator_ljd_Ljd_decompile(
 
     ljd_ctx* ctx = ljd_init((uint32_t)options);
     if (!ctx) {
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, ljd_strerror(LJD_ERR_OOM));
         return nullptr;
     }
@@ -68,13 +68,13 @@ Java_com_marsinator_ljd_Ljd_decompile(
 
     if (rc != LJD_OK) {
         if (out) ljd_free_string(out);
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, ljd_strerror(rc));
         return nullptr;
     }
 
     if (!out) {
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, "Decompiler returned empty output");
         return nullptr;
     }
@@ -85,7 +85,7 @@ Java_com_marsinator_ljd_Ljd_decompile(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_marsinator_ljd_Ljd_decompileFile(
+Java_com_neodroid_ide_ljd_Ljd_decompileFile(
         JNIEnv* env,
         jclass /*cls*/,
         jstring inputPath,
@@ -93,7 +93,7 @@ Java_com_marsinator_ljd_Ljd_decompileFile(
         jboolean overwrite) {
 
     if (!inputPath || !outputPath) {
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, ljd_strerror(LJD_ERR_NULL_PTR));
         return nullptr;
     }
@@ -103,7 +103,7 @@ Java_com_marsinator_ljd_Ljd_decompileFile(
     if (!in_c || !out_c) {
         if (in_c) env->ReleaseStringUTFChars(inputPath, in_c);
         if (out_c) env->ReleaseStringUTFChars(outputPath, out_c);
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, ljd_strerror(LJD_ERR_NULL_PTR));
         return nullptr;
     }
@@ -112,7 +112,7 @@ Java_com_marsinator_ljd_Ljd_decompileFile(
     if (!ctx) {
         env->ReleaseStringUTFChars(inputPath, in_c);
         env->ReleaseStringUTFChars(outputPath, out_c);
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, ljd_strerror(LJD_ERR_OOM));
         return nullptr;
     }
@@ -127,13 +127,13 @@ Java_com_marsinator_ljd_Ljd_decompileFile(
 
     if (rc != LJD_OK) {
         if (out) ljd_free_string(out);
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, ljd_strerror(rc));
         return nullptr;
     }
 
     if (!out) {
-        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        jclass exc = env->FindClass("com/neodroid/ide/ljd/LjdException");
         env->ThrowNew(exc, "Decompiler returned empty output");
         return nullptr;
     }
