@@ -2699,7 +2699,7 @@ void Ast::build_if_statements_from_map(Function& function, std::vector<Statement
 	for (uint32_t i = 0; i < block.size(); i++) {
 		switch (block[i]->type) {
 		case AST_STATEMENT_GOTO:
-			if (!offsetMap.find(block[i]) != offsetMap.end()) continue;
+			if (offsetMap.find(block[i]) == offsetMap.end()) continue;
 		case AST_STATEMENT_CONDITION:
 			function.remove_jump(block[i]->instruction.id, block[i]->instruction.target);
 			index = offsetMap[block[i]] + i;
