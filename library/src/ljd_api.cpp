@@ -226,3 +226,75 @@ extern "C" const char* ljd_cache_dir(const ljd_ctx* ctx) {
     if (!ctx) return "";
     return reinterpret_cast<const ljd::Decompiler*>(ctx)->cacheDir.c_str();
 }
+
+extern "C" int ljd_decompile_file(ljd_ctx* ctx,
+                                  const char* input_path,
+                                  const char* output_path,
+                                  bool overwrite,
+                                  char** out,
+                                  size_t* out_sz) {
+    *out = nullptr;
+    *out_sz = 0;
+    if (!ctx || !input_path || !output_path || !out) return LJD_ERR_NULL_PTR;
+
+    ljd::Decompiler* decomp = reinterpret_cast<ljd::Decompiler*>(ctx);
+    uint32_t options = decomp->options;
+
+    try {
+        /* Check overwrite flag */
+        if (!overwrite) {
+            FILE* f = fopen(output_path, "rb");
+            if (f) {
+                fclose(f);
+                return LJD_ERR_READ;
+            }
+        }
+
+        Bytecode bc{string(input_path)};
+        bc();
+
+        Ast ast(bc, (options & LJD_OPT_IGNORE_DEBUG_INFO) != 0,
+                (options & LJD_OPT_MINIMIZE_DIFFS) != 0);
+        ast();
+
+        Lua lua(bc, ast, string(output_path), overwrite,
+                (options & LJD_OPT_MINIMIZE_DIFFS) != 0,
+                (options & LJD_OPT_UNRESTRICTED_ASCII) != 0);
+        lua();
+
+        /* Read back the written file to return as string */
+        {
+            FILE* f = fopen(output_path, "rb");
+            if (!f) return LJD_ERR_READ;
+            fseek(f, 0, SEEK_END);
+            long len = ftell(f);
+            fseek(f, 0, SEEK_SET);
+            if (len < 0) {
+                fclose(f);
+                return LJD_ERR_READ;
+            }
+            string result;
+            result.resize((size_t)len);
+            if (len > 0) {
+                size_t rd = fread(&result[0], 1, (size_t)len, f);
+                if ((long)rd != len) {
+                    fclose(f);
+                    return LJD_ERR_READ;
+                }
+            }
+            fclose(f);
+            *out = (char*)malloc(result.size() + 1);
+            if (!*out) return LJD_ERR_OOM;
+            memcpy(*out, result.data(), result.size());
+            (*out)[result.size()] = '\0';
+            *out_sz = result.size();
+        }
+
+        return LJD_OK;
+    } catch (const std::bad_alloc&) {
+        return LJD_ERR_OOM;
+    } catch (...) {
+        return LJD_ERR_INTERNAL;
+    }
+}
+

@@ -84,4 +84,64 @@ Java_com_marsinator_ljd_Ljd_decompile(
     jstring result = env->NewStringUTF(out);
     ljd_free_string(out);
     return result;
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_marsinator_ljd_Ljd_decompileFile(
+        JNIEnv* env,
+        jclass /*cls*/,
+        jstring inputPath,
+        jstring outputPath,
+        jboolean overwrite) {
+
+    if (!inputPath || !outputPath) {
+        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        env->ThrowNew(exc, ljd_strerror(LJD_ERR_NULL_PTR));
+        return nullptr;
+    }
+
+    const char* in_c = env->GetStringUTFChars(inputPath, nullptr);
+    const char* out_c = env->GetStringUTFChars(outputPath, nullptr);
+    if (!in_c || !out_c) {
+        if (in_c) env->ReleaseStringUTFChars(inputPath, in_c);
+        if (out_c) env->ReleaseStringUTFChars(outputPath, out_c);
+        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        env->ThrowNew(exc, ljd_strerror(LJD_ERR_NULL_PTR));
+        return nullptr;
+    }
+
+    ljd_ctx* ctx = ljd_init(0);
+    if (!ctx) {
+        env->ReleaseStringUTFChars(inputPath, in_c);
+        env->ReleaseStringUTFChars(outputPath, out_c);
+        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        env->ThrowNew(exc, ljd_strerror(LJD_ERR_OOM));
+        return nullptr;
+    }
+
+    char* out = nullptr;
+    size_t out_sz = 0;
+    int rc = ljd_decompile_file(ctx, in_c, out_c, overwrite, &out, &out_sz);
+    ljd_close(ctx);
+
+    env->ReleaseStringUTFChars(inputPath, in_c);
+    env->ReleaseStringUTFChars(outputPath, out_c);
+
+    if (rc != LJD_OK) {
+        if (out) ljd_free_string(out);
+        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        env->ThrowNew(exc, ljd_strerror(rc));
+        return nullptr;
+    }
+
+    if (!out) {
+        jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
+        env->ThrowNew(exc, "Decompiler returned empty output");
+        return nullptr;
+    }
+
+    jstring result = env->NewStringUTF(out);
+    ljd_free_string(out);
+    return result;
+}
+
 }

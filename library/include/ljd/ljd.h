@@ -99,6 +99,28 @@ const char* ljd_version(void);
  */
 const char* ljd_cache_dir(const ljd_ctx* ctx);
 
+
+/*
+ * Decompile a LuaJIT bytecode file to a source file.
+ *
+ *   ctx        - initialised context returned by ljd_init.
+ *   input_path - path to the LuaJIT bytecode file.
+ *   output_path- path where the decompiled source will be written.
+ *   overwrite  - if false and output_path already exists, return LJD_ERR_READ.
+ *   out        - receives a NUL-terminated UTF-8 string on success.
+ *   out_sz     - receives the byte length of the output string, excluding
+ *                the trailing NUL.
+ *
+ * Returns LJD_OK on success, or one of the LJD_ERR_* codes on failure.
+ * On failure, *out and *out_sz are set to NULL and 0 respectively.
+ */
+int ljd_decompile_file(ljd_ctx* ctx,
+                       const char* input_path,
+                       const char* output_path,
+                       bool overwrite,
+                       char** out,
+                       size_t* out_sz);
+
 #ifdef __cplusplus
 }
 #endif

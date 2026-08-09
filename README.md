@@ -145,15 +145,21 @@ public class Ljd {
     public static native String version();
     public static native String cacheDir();
     public static native String decompile(byte[] bytecode, int options, String cacheDir);
+    public static native String decompileFile(String inputPath, String outputPath, boolean overwrite);
 }
 ```
 
 Usage:
 
 ```java
+// In-memory decompilation
 byte[] bytecode = Files.readAllBytes(path);
 String source = Ljd.decompile(bytecode, LjdOptions.NONE, context.getCacheDir().getAbsolutePath());
 System.out.println(source);
+
+// File-based decompilation
+String result = Ljd.decompileFile("/data/local/tmp/script.luac", "/data/local/tmp/script.lua", false);
+System.out.println(result);
 ```
 
 On Android, add the prebuilt `libljd.so` to `src/main/jniLibs/arm64-v8a/`.
