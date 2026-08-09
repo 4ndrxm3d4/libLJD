@@ -30,7 +30,7 @@ Java_com_marsinator_ljd_Ljd_decompile(
         jclass /*cls*/,
         jbyteArray bytecode,
         jint options,
-        jstring cacheDir) throws LjdException {
+        jstring cacheDir) {
 
     if (!bytecode) {
         jclass exc = env->FindClass("com/marsinator/ljd/LjdException");
