@@ -70,6 +70,39 @@ if (rc == LJD_OK) {
 ljd_close(ctx);
 ```
 
+### Reading files from storage (C)
+
+```c
+#include <stdio.h>
+#include "ljd/ljd.h"
+
+int main() {
+    FILE* f = fopen("/data/local/tmp/script.luac", "rb");
+    if (!f) { perror("open"); return 1; }
+
+    fseek(f, 0, SEEK_END);
+    long sz = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    uint8_t* buf = malloc(sz);
+    fread(buf, 1, sz, f);
+    fclose(f);
+
+    ljd_ctx* ctx = ljd_init(LJD_OPT_NONE);
+    char* out = NULL;
+    size_t out_sz = 0;
+    int rc = ljd_decompile(ctx, buf, sz, &out, &out_sz);
+    ljd_close(ctx);
+    free(buf);
+
+    if (rc == LJD_OK) {
+        printf("%s", out);
+        ljd_free_string(out);
+    }
+    return 0;
+}
+```
+
 ### File-based decompilation
 
 The same library also exposes a file-to-file API:
@@ -209,6 +242,32 @@ fun decompileFile(inputPath: String, outputPath: String, overwrite: Boolean = fa
 
 ```python
 import ctypes
+from pathlib import Path
+
+lib = ctypes.CDLL(str(Path("build/libljd.so").resolve()))
+lib.ljd_init.restype = ctypes.c_void_p
+lib.ljd_decompile_file.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool, ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_size_t)]
+lib.ljd_decompile_file.restype = ctypes.c_int
+
+# Reading bytecode from file
+bytecode = Path("/data/local/tmp/script.luac").read_bytes()
+in_buf = ctypes.create_string_buffer(bytecode, len(bytecode))
+
+ctx = lib.ljd_init(0)
+out = ctypes.c_char_p()
+out_sz = ctypes.c_size_t()
+
+# In-memory decompile
+rc = lib.ljd_decompile(ctx, in_buf, len(bytecode), ctypes.byref(out), ctypes.byref(out_sz))
+
+# Or file-to-file
+# rc = lib.ljd_decompile_file(ctx, b"/data/local/tmp/script.luac", b"/data/local/tmp/out.lua", False, ctypes.byref(out), ctypes.byref(out_sz))
+
+lib.ljd_close(ctx)
+if rc == 0 and out.value:
+    print(out.value.decode())
+    lib.ljd_free_string(out)
+```
 from pathlib import Path
 
 lib = ctypes.CDLL(str(Path("build/libljd.so").resolve()))
