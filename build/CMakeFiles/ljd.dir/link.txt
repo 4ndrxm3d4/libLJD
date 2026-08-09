@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -shared -Wl,-soname,libljd.so -o libljd.so CMakeFiles/ljd.dir/bytecode/bytecode.cpp.o CMakeFiles/ljd.dir/bytecode/prototype.cpp.o CMakeFiles/ljd.dir/ast/ast.cpp.o CMakeFiles/ljd.dir/lua/lua.cpp.o CMakeFiles/ljd.dir/library/src/ljd_api.cpp.o CMakeFiles/ljd.dir/library/src/ljd_jni.cpp.o 

@@ -1,3 +1,0 @@
-/root/luajit-decompiler-v2/build/CMakeFiles/ljd.dir
-/root/luajit-decompiler-v2/build/CMakeFiles/edit_cache.dir
-/root/luajit-decompiler-v2/build/CMakeFiles/rebuild_cache.dir
