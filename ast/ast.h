@@ -1,3 +1,4 @@
+#include <unordered_map>
 class Ast {
 private:
 
@@ -10,7 +11,6 @@ private:
 		NUMBER_CONSTANT
 	};
 
-
 public:
 	struct Expression;
 	struct Constant;
@@ -21,8 +21,8 @@ public:
 	struct UnaryOperation;
 	struct Statement;
 	struct Function;
-	#include "building_blocks.h"
 	#include "function.h"
+	#include "building_blocks.h"
 
 	Ast(const Bytecode& bytecode, const bool& ignoreDebugInfo, const bool& minimizeDiffs);
 	~Ast();

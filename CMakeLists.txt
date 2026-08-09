@@ -32,10 +32,12 @@ target_sources(ljd PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/ast/ast.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lua/lua.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/library/src/ljd_api.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/library/src/ljd_jni.cpp
 )
 
 if(ANDROID)
+    target_sources(ljd PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/library/src/ljd_jni.cpp
+    )
     find_library(LOG_LIB log)
     target_link_libraries(ljd PRIVATE ${LOG_LIB})
 endif()

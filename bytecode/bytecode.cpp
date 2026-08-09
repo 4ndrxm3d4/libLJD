@@ -59,17 +59,17 @@ void Bytecode::read_prototypes() {
 }
 
 void Bytecode::open_file() {
-	file = (HANDLE)fopen(filePath.c_str(), "rb");
-	assert(file != INVALID_HANDLE_VALUE, "Unable to open file", filePath, DEBUG_INFO);
+	file = fopen(filePath.c_str(), "rb");
+	assert(file != nullptr, "Unable to open file", filePath, DEBUG_INFO);
 	fileSize = ljd_get_file_size((FILE*)file);
 	assert(fileSize >= MIN_FILE_SIZE, "File is too small or empty", filePath, DEBUG_INFO);
 	bytesUnread = fileSize;
 }
 
 void Bytecode::close_file() {
-	if (file == INVALID_HANDLE_VALUE) return;
+	if (file == nullptr) return;
 	ljd_close_file((FILE*)file);
-	file = INVALID_HANDLE_VALUE;
+	file = nullptr;
 }
 
 void Bytecode::read_file(const uint32_t& byteCount) {

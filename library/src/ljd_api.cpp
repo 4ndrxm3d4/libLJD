@@ -1,4 +1,5 @@
 #include "ljd/ljd.h"
+#include <cstdio>
 
 #include <cstdio>
 #include <cstdlib>
@@ -10,15 +11,15 @@
 #include <cstring>
 #include <type_traits>
 
-namespace ljd {
-    template <typename To, typename From>
-    To bit_cast(const From& f) {
-        static_assert(sizeof(To) == sizeof(From), "bit_cast size mismatch");
-        To t;
-        memcpy(&t, &f, sizeof(t));
-        return t;
-    }
-}
+class Bytecode;
+class Ast;
+class Lua;
+
+#include "bytecode/bytecode.h"
+#include "ast/ast.h"
+#include "lua/lua.h"
+
+#include "ljd_compat.h"
 
 using namespace std;
 
@@ -117,7 +118,7 @@ struct Decompiler {
                 fclose(f);
             }
 
-            Bytecode bc(inPath);
+            Bytecode bc{std::string(inPath)};
             bc();
 
             Ast ast(bc, (options & LJD_OPT_IGNORE_DEBUG_INFO) != 0,
@@ -128,7 +129,7 @@ struct Decompiler {
             snprintf(outPath, sizeof(outPath),
                      "%s/ljd_out_%p.lua", cacheDir.c_str(), (void*)out);
 
-            Lua lua(bc, ast, outPath, true,
+            Lua lua(bc, ast, std::string(outPath), true,
                     (options & LJD_OPT_MINIMIZE_DIFFS) != 0,
                     (options & LJD_OPT_UNRESTRICTED_ASCII) != 0);
             lua();
@@ -136,7 +137,7 @@ struct Decompiler {
             {
                 FILE* f = fopen(outPath, "rb");
                 if (!f) {
-                    unlink(inPath);
+                    std::remove(inPath);
                     return LJD_ERR_READ;
                 }
                 fseek(f, 0, SEEK_END);
@@ -144,8 +145,8 @@ struct Decompiler {
                 fseek(f, 0, SEEK_SET);
                 if (len < 0) {
                     fclose(f);
-                    unlink(inPath);
-                    unlink(outPath);
+                    std::remove(inPath);
+                    std::remove(outPath);
                     return LJD_ERR_READ;
                 }
                 out->resize((size_t)len);
@@ -153,20 +154,18 @@ struct Decompiler {
                     size_t rd = fread(out->data(), 1, (size_t)len, f);
                     if ((long)rd != len) {
                         fclose(f);
-                        unlink(inPath);
-                        unlink(outPath);
+                        std::remove(inPath);
+                        std::remove(outPath);
                         return LJD_ERR_READ;
                     }
                 }
                 fclose(f);
-                unlink(outPath);
+                std::remove(outPath);
             }
 
-            unlink(inPath);
+            std::remove(inPath);
             return LJD_OK;
-        } catch (const Error&) {
-            return LJD_ERR_PARSE;
-        } catch (const bad_alloc&) {
+        } catch (const std::bad_alloc&) {
             return LJD_ERR_OOM;
         } catch (...) {
             return LJD_ERR_INTERNAL;
@@ -194,7 +193,7 @@ extern "C" int ljd_decompile(ljd_ctx* ctx,
     if (!ctx || !bytecode || !bytecode_sz || !out) return LJD_ERR_NULL_PTR;
 
     string result;
-    int rc = static_cast<ljd::Decompiler*>(ctx)->run(bytecode, bytecode_sz, &result);
+    int rc = reinterpret_cast<ljd::Decompiler*>(ctx)->run(bytecode, bytecode_sz, &result);
     if (rc == LJD_OK) {
         *out = (char*)malloc(result.size() + 1);
         if (!*out) return LJD_ERR_OOM;
@@ -234,5 +233,5 @@ extern "C" const char* ljd_version(void) {
 
 extern "C" const char* ljd_cache_dir(const ljd_ctx* ctx) {
     if (!ctx) return "";
-    return static_cast<const ljd::Decompiler*>(ctx)->cacheDir.c_str();
+    return reinterpret_cast<const ljd::Decompiler*>(ctx)->cacheDir.c_str();
 }

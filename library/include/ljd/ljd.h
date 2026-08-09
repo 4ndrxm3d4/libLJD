@@ -30,7 +30,7 @@ extern "C" {
  *
  * The caller must not read or modify its contents.
  */
-typedef struct ljd_ctx ljd_ctx;
+struct ljd_ctx { void* p; };
 
 /*
  * Initialise the decompiler library. Returns NULL on failure.

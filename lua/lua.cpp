@@ -1011,14 +1011,14 @@ void Lua::create_file() {
 		}
 	}
 #endif
-	file = (HANDLE)fopen(filePath.c_str(), "wb");
-	assert(file != INVALID_HANDLE_VALUE, "Unable to create file", filePath, DEBUG_INFO);
+	file = fopen(filePath.c_str(), "wb");
+	assert(file != nullptr, "Unable to create file", filePath, DEBUG_INFO);
 }
 
 void Lua::close_file() {
-	if (file == INVALID_HANDLE_VALUE) return;
+	if (file == nullptr) return;
 	ljd_close_file((FILE*)file);
-	file = INVALID_HANDLE_VALUE;
+	file = nullptr;
 }
 
 void Lua::write_file() {
