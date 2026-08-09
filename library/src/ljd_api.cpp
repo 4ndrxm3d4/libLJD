@@ -58,6 +58,7 @@ std::string byte_to_string(const uint8_t& byte) {
     return string(buf);
 }
 
+
 /* ------------------------------------------------------------------ */
 /* Portable cache-directory helpers                                    */
 /* ------------------------------------------------------------------ */
